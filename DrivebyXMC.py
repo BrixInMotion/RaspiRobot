@@ -40,27 +40,13 @@ WaitStep = 0x04
 SpeedStepPlus = 0x05
 SpeedStepMinus = 0x06
 
-# Addr 0x40 for Adafuit board, 0x55 for XMC board<-<-<-<-<-<-<-<-<-<-<-<-<-<-I2C-Addresses
+# Addr 0x40 for Adafuit board, 0x55 for XMC board <-<-<-<-<-<-<-<-<-<-I2C-Addresses
+#bus.write_byte_data(address_xmc,register,value)
 pwm = PWM(0x40, debug=True)
 pwm.setPWMFreq(60)                        # 1000 Hz for wheels, 60 for servos
 bus = smbus.SMBus(1)
 address_xmc = 0x55
-setup()
-
-#bus.write_byte_data(address_xmc,register,value)
-#--------------------------------------------------------------------
-def Set_PWW_Frequency(frequenz):
-    global lastPWM
-    if lastPWM != frequenz:
-        pwm.setPWMFreq(frequenz)
-        lastPWM = frequenz
-#--------------------------------------------------------------------
-def Set_I2C_Address(ADAaddress):
-    global lastAddr
-    if lastAddr != ADAaddress:
-        pwm = PWM(ADAaddress, debug=True)
-        lastAddr = ADAaddress
-        print ("I2C Addresse: ", ADAaddress)
+setup()                                 #Setup for Portexpander
 #--------------------------------------------------------------------
 atexit.register(set_normal_term)
 set_curses_term()
@@ -105,10 +91,6 @@ try:
             bus.write_byte_data(address_xmc,SpeedElevator, (0x80 + 0x40))
         elif Richtung=="j": #Platform halt
             bus.write_byte_data(address_xmc,SpeedElevator, 0x00)
-        #elif Richtung=="c": servoMax = 700
-        #elif Richtung=="v": servoMax = 1000
-        #elif Richtung=="b": servoMax = 1500
-        #elif Richtung=="n": servoMax = 2000
         elif Richtung=="l": #Licht an
             sendSPI(SPI_SLAVE_ADDR, SPI_GPIOA, 0b10000000)
         elif Richtung=="o": #Licht aus
@@ -172,14 +154,8 @@ try:
             temp_s = servoMax_s
 
 except KeyboardInterrupt:
-    #Set_I2C_Address(0x55)
-    #pwm.setPWM(0, 0, servoMin),
-    #pwm.setPWM(1, 0, servoMin),
-    #pwm.setPWM(2, 0, servoMin),
-    #pwm.setPWM(3, 0, servoMin),
-    Set_I2C_Address(0x40)
-    pwm.setPWM(12, 0, servoMin),
-    pwm.setPWM(13, 0, servoMin)
+    bus.write_byte_data(address_xmc,SpeedLeftMotor,0)
+    bus.write_byte_data(address_xmc,SpeedRightMotor,0)
+    pwm.setPWM(8, 0, mitte_h)
+    pwm.setPWM(9, 0, mitte_s)
     GPIO.cleanup()
-
-#raw_input("Richtung: ")
